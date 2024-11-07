@@ -1,6 +1,9 @@
 let map;
 let shopData = [];
 let nearbyShops = [];
+let radius = 2; // Default radius in km
+let userMarker, userRadiusCircle;
+let markers = []; // Track markers for later removal
 
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
@@ -39,15 +42,30 @@ function getUserLocation() {
       position => {
         const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
 
-        const userRadiusCircle = new google.maps.Circle({
+        // Clear the previous user marker and circle if they exist
+        clearPreviousMarkers();
+
+        // Create a new circle with the updated radius
+        userRadiusCircle = new google.maps.Circle({
           map: map,
           center: userLocation,
-          radius: 2000, // Radius in meters (5000m = 5km)
+          radius: radius * 1000, // Convert radius to meters
           fillColor: "#FF0000",
           fillOpacity: 0.2,
           strokeColor: "#FF0000",
           strokeOpacity: 0.5,
           strokeWeight: 1,
+        });
+
+        // Create a new user marker
+        userMarker = new google.maps.Marker({
+          position: userLocation,
+          map: map,
+          title: "Your Location",
+          icon: {
+            url: "assets/img/animated/here.gif",
+            scaledSize: new google.maps.Size(80, 80)
+          }
         });
 
         findNearestShops(userLocation);
@@ -60,7 +78,7 @@ function getUserLocation() {
 }
 
 function calculateDistance(loc1, loc2) {
-  const R = 6371;
+  const R = 6371; // Earth's radius in km
   const dLat = ((loc2.lat - loc1.lat) * Math.PI) / 180;
   const dLng = ((loc2.lng - loc1.lng) * Math.PI) / 180;
   const a =
@@ -74,7 +92,7 @@ function calculateDistance(loc1, loc2) {
 }
 
 function findNearestShops(userLocation) {
-  const maxDistance = 2; // Maximum distance in km to consider "nearby"
+  const maxDistance = radius; // Use the radius selected by the user
   nearbyShops = shopData.filter(shop => calculateDistance(userLocation, shop.location) <= maxDistance);
 
   if (nearbyShops.length > 0) {
@@ -88,15 +106,9 @@ function findNearestShops(userLocation) {
 }
 
 function addMarkersAndSidebar(userLocation) {
-  const userMarker = new google.maps.Marker({
-    position: userLocation,
-    map: map,
-    title: "Your Location",
-    icon: {
-      url: "assets/img/animated/here.gif",
-      scaledSize: new google.maps.Size(80, 80)
-    }
-  });
+  // Clear any existing markers and sidebar content before adding new data
+  clearMarkers();
+  clearSidebar();
 
   nearbyShops.forEach(shop => {
     const marker = new google.maps.Marker({
@@ -104,6 +116,8 @@ function addMarkersAndSidebar(userLocation) {
       map: map,
       title: shop.name,
     });
+    
+    markers.push(marker); // Keep track of markers
 
     const infoWindow = new google.maps.InfoWindow({
       content: `
@@ -200,4 +214,28 @@ function showDetails(shop) {
 function closeDetails() {
   document.getElementById("sidebar-back").classList.remove("show");
   history.pushState(null, "", "");
+}
+
+function updateRadius(newRadius) {
+  radius = newRadius;
+  getUserLocation();  // Re-fetch the user's location and apply filters again
+}
+
+// Clear all markers on the map
+function clearMarkers() {
+  markers.forEach(marker => marker.setMap(null)); // Remove each marker
+  markers = []; // Clear the markers array
+}
+
+// Clear previous user marker and radius circle
+function clearPreviousMarkers() {
+  if (userMarker) userMarker.setMap(null);
+  if (userRadiusCircle) userRadiusCircle.setMap(null);
+  nearbyShops = []; // Clear the previously found shops
+}
+
+// Clear Sidebar Data
+function clearSidebar() {
+  const shopList = document.getElementById("shop-list");
+  shopList.innerHTML = ""; // Clear all previous shop cards
 }
