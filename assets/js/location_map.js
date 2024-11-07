@@ -1,23 +1,22 @@
 let map;
-let shopData = []; // Initialize an empty array to store shop data
+let shopData = [];
+let nearbyShops = [];
 
 function initMap() {
   map = new google.maps.Map(document.getElementById("map"), {
     center: { lat: 40.7128, lng: -74.006 },
     zoom: 11,
   });
-  
-  // Fetch data from the backend API and initialize map with markers
+
   loadShopsData();
 }
 
 async function loadShopsData() {
   try {
     const response = await fetch("http://localhost:8083/places/v1/api/loadPlaces");
-    if (!response.ok) {
-      throw new Error("Network response was not ok " + response.statusText);
-    }
+    if (!response.ok) throw new Error("Network response was not ok " + response.statusText);
     const data = await response.json();
+    
     shopData = data.map(shop => ({
       name: shop.name,
       address: shop.address,
@@ -25,30 +24,25 @@ async function loadShopsData() {
       phone: shop.phone || "N/A",
       availability: shop.availability || "N/A",
       location: { lat: parseFloat(shop.location.lat), lng: parseFloat(shop.location.lng) },
+      tags: shop.tags || []
     }));
 
-    // After loading data, find user location and nearest shop
     getUserLocation();
   } catch (error) {
     console.error("Failed to load shop data:", error);
   }
 }
 
-// Request user's location and find nearest shop
 function getUserLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        };
+      position => {
+        const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
 
-        // Add a circle to show the search radius around the user's location
         const userRadiusCircle = new google.maps.Circle({
           map: map,
           center: userLocation,
-          radius: 1000, // Radius in meters (5000m = 5km)
+          radius: 2000, // Radius in meters (5000m = 5km)
           fillColor: "#FF0000",
           fillOpacity: 0.2,
           strokeColor: "#FF0000",
@@ -56,7 +50,7 @@ function getUserLocation() {
           strokeWeight: 1,
         });
 
-        findNearestShop(userLocation);
+        findNearestShops(userLocation);
       },
       () => alert("Location access denied.")
     );
@@ -65,10 +59,8 @@ function getUserLocation() {
   }
 }
 
-
-// Calculate distance between two points using the Haversine formula
 function calculateDistance(loc1, loc2) {
-  const R = 6371; // Radius of the Earth in km
+  const R = 6371;
   const dLat = ((loc2.lat - loc1.lat) * Math.PI) / 180;
   const dLng = ((loc2.lng - loc1.lng) * Math.PI) / 180;
   const a =
@@ -78,44 +70,35 @@ function calculateDistance(loc1, loc2) {
       Math.sin(dLng / 2) *
       Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c; // Distance in km
+  return R * c;
 }
 
-// Find the nearest shop
-function findNearestShop(userLocation) {
-  let nearestShop = null;
-  let minDistance = Infinity;
+function findNearestShops(userLocation) {
+  const maxDistance = 2; // Maximum distance in km to consider "nearby"
+  nearbyShops = shopData.filter(shop => calculateDistance(userLocation, shop.location) <= maxDistance);
 
-  shopData.forEach((shop) => {
-    const distance = calculateDistance(userLocation, shop.location);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestShop = shop;
-    }
-  });
-
-  if (nearestShop) {
-    map.setCenter(nearestShop.location);
+  if (nearbyShops.length > 0) {
+    map.setCenter(userLocation);
     map.setZoom(14);
-    
-    showDetails(nearestShop); // Show nearest shop details
-    addMarkersAndSidebar(userLocation); // Add markers for all shops and user location
+
+    addMarkersAndSidebar(userLocation);
+  } else {
+    alert("No shops found within the specified range.");
   }
 }
 
-// Initialize markers and sidebar for all shops
 function addMarkersAndSidebar(userLocation) {
   const userMarker = new google.maps.Marker({
     position: userLocation,
     map: map,
     title: "Your Location",
     icon: {
-        url: "assets/img/animated/here.gif",
-        scaledSize: new google.maps.Size(80, 80) // Adjust width and height as needed
+      url: "assets/img/animated/here.gif",
+      scaledSize: new google.maps.Size(80, 80)
     }
   });
 
-  shopData.forEach((shop) => {
+  nearbyShops.forEach(shop => {
     const marker = new google.maps.Marker({
       position: shop.location,
       map: map,
@@ -150,7 +133,6 @@ function addMarkersAndSidebar(userLocation) {
   });
 }
 
-// Function to add shop cards to the sidebar
 function addShopToSidebar(shop, infoWindow, marker) {
   const shopList = document.getElementById("shop-list");
   const shopCard = document.createElement("div");
@@ -176,7 +158,6 @@ function addShopToSidebar(shop, infoWindow, marker) {
   shopCard.addEventListener("click", () => showDetails(shop));
 }
 
-// Show details of the selected shop in a sidebar
 function showDetails(shop) {
   document.getElementById("sidebar-back").classList.add("show");
 
@@ -209,21 +190,8 @@ function showDetails(shop) {
     <div class="card p-3 mb-3">
       <h6>John Smith</h6>
       <p>Car analyzing ⭐⭐⭐⭐⭐</p>
-      <p>Feugiat pretium nibh ipsum consequat. Tempus iaculis urna id volutpat lacus laoreet non curabitur gravida. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non.</p>
+      <p>Feugiat pretium nibh ipsum consequat.</p>
     </div>
-    <div class="card p-3 mb-3">
-      <h6>John Smith</h6>
-      <p>Car analyzing ⭐⭐⭐⭐⭐</p>
-      <p>Feugiat pretium nibh ipsum consequat. Tempus iaculis urna id volutpat lacus laoreet non curabitur gravida. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non.</p>
-    </div>
-    <div class="card p-3 mb-3">
-      <h6>John Smith</h6>
-      <p>Car analyzing ⭐⭐⭐⭐⭐</p>
-      <p>Feugiat pretium nibh ipsum consequat. Tempus iaculis urna id volutpat lacus laoreet non curabitur gravida. Venenatis lectus magna fringilla urna porttitor rhoncus dolor purus non.</p>
-    </div>
-
-    <hr>
-    <p>Add some extra data here</p>
   `;
 
   history.pushState(null, "", `?shop=${encodeURIComponent(shop.name)}`);
@@ -231,5 +199,5 @@ function showDetails(shop) {
 
 function closeDetails() {
   document.getElementById("sidebar-back").classList.remove("show");
-  history.pushState(null, "", ""); // Reset URL to initial state
+  history.pushState(null, "", "");
 }
