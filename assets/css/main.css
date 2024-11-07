@@ -2078,7 +2078,7 @@ section,
   position: relative;
 }
 
-#location_maps #sidebar-back.show {
+#location_maps #sidebar-back.show{
   width: 100%;
   max-width: 30%;
   border-top: 1px solid #d1d1d1;
@@ -2091,7 +2091,7 @@ section,
   top: 0;
   left: 0;
   bottom: 0;
-  transition: transform 0.4s ease-in-out;
+  transition: all 0.4s ease;
   display: block;
 }
 
@@ -2099,6 +2099,25 @@ section,
   left: -100%;
   display: none;
 }
+
+#location_maps .advanced-filter {
+  display: block;
+  border-left: 1px solid #d1d1d1;
+  background-color: #f7f8fa;
+  position: fixed;
+  height: 100vh;
+  top: 0;
+  bottom: 0;
+  left: -100%;
+  padding: 20px;
+}
+
+#location_maps .advanced-filter.show {
+  max-width: 50%;
+  z-index: 2;
+  left: 30%;
+}
+
 
 .mr-15 {
   margin-right: 15px;
