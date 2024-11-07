@@ -115,7 +115,7 @@
               </ul>
             </li>
           </ul>
-          <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+          <i class="mobile-nav-toggle d-xl-none bi bi-list" style="color: #000;"></i>
         </nav>
   
         <!-- <a class="btn-getstarted" href="get-a-quote.html">
@@ -132,12 +132,42 @@
     <section id="location_maps">
       <div class="container-fluid">
         <div class="sidebar">
-          <h2>Auto Repair Shops Near Me</h2>
+          <div class="container_fluid">
+            <h2>Shops Near Me</h2>
+            <h5>Search by tags</h5>
+            <div class="my-3">
+              <div class="form-group">
+                <input type="text" class="form-control border-primary w-100" placeholder="Enter key words to find" />
+              </div>
+            </div>
+            <h5>Choose your car specification</h5>
+            <form class="my-3">
+              <div class="d-flex gap-3">
+                <!-- Car Brand Dropdown -->
+                <div class="custom-dropdown border-primary w-100">
+                  <div class="dropdown-btn">Марка авто</div>
+                  <div class="dropdown-content w-100" id="brand-dropdown">
+                    <!-- Brand options will be populated here by JavaScript -->
+                  </div>
+                </div>
+
+                <!-- Car Model Dropdown -->
+                <div class="custom-dropdown border-primary w-100">
+                  <div class="dropdown-btn">Модель</div>
+                  <div class="dropdown-content w-100" id="model-dropdown">
+                    <!-- Model options will be populated here by JavaScript -->
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <!-- <h5>Sort details</h5>
           <div class="btn-group mb-3" role="group" aria-label="Filter options">
             <button type="button" class="btn btn-primary">Sort by</button>
             <button type="button" class="btn btn-primary">Availability</button>
             <button type="button" class="btn btn-primary">Specialties</button>
-          </div>
+          </div> -->
+          <h5>Available shops by your request</h5>
           <div id="shop-list" class="d-flex flex-column">
             <!-- List of repair shops will go here -->
           </div>
@@ -171,5 +201,7 @@
 
     <!-- Main JS File -->
     <script src="assets/js/main.js"></script>
+
+    <script src="assets/js/car_filter.js"></script>
   </body>
 </html>
