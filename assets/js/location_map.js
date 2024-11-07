@@ -216,8 +216,13 @@ function closeDetails() {
   history.pushState(null, "", "");
 }
 
-function updateRadius(newRadius) {
-  radius = newRadius;
+function updateRadius(value) {
+  // Update the radius value display
+  const rangeValueElement = document.getElementById("range-value");
+  rangeValueElement.textContent = `${value} km`;
+
+  // You can call your function to update the map with the new radius here
+  radius = value;
   getUserLocation();  // Re-fetch the user's location and apply filters again
 }
 

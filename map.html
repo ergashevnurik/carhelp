@@ -140,10 +140,10 @@
                 <input type="text" class="form-control border-primary w-100 tags_input" placeholder="Enter key words to find" />
               </div>
             </div>
-            <h5>Search by radius</h5>
+            <h5>Search by radius: <span id="range-value">2 km</span></h5>
             <div class="my-3">
               <div class="form-group">
-                <input type="range" id="radius" min="1" max="50" value="2" step="1" onchange="updateRadius(this.value)">
+                <input type="range" class="form-range w-100" id="radius" min="1" max="50" value="2" step="1" onchange="updateRadius(this.value)">
               </div>
             </div>
             <h5>Choose your car specification</h5>
