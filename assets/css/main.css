@@ -2108,12 +2108,13 @@ section,
   height: 100vh;
   top: 0;
   bottom: 0;
-  left: -100%;
+  left: -1000%;
   padding: 20px;
 }
 
 #location_maps .advanced-filter.show {
-  max-width: 50%;
+  width: 30%;
+  max-width: 30%;
   z-index: 2;
   left: 30%;
 }

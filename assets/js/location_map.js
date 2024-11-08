@@ -23,9 +23,9 @@ async function loadShopsData() {
     shopData = data.map(shop => ({
       name: shop.name,
       address: shop.address,
-      rating: shop.rating || "N/A",
-      phone: shop.phone || "N/A",
-      availability: shop.availability || "N/A",
+      rating: shop.rating.toFixed(1),
+      phone: shop.phone,
+      availability: shop.availability,
       location: { lat: parseFloat(shop.location.lat), lng: parseFloat(shop.location.lng) },
       tags: shop.tags || []
     }));
@@ -191,7 +191,7 @@ function showDetails(shop) {
     <p>By clicking order call button, you will share your details</p>
 
     <h5>Call by yourself</h5>
-    <a href="tel:+371xxxxxxxx" class="btn btn-outline-dark w-100">CALL RIGHT NOW</a>
+    <a href="tel:${shop.phone}" target="_blank" class="btn btn-outline-dark w-100">CALL RIGHT NOW</a>
 
     <h5 class="mt-3">Our price list</h5>
     <ul>
