@@ -2100,6 +2100,39 @@ section,
   display: none;
 }
 
+#location_maps .sidebar-back .gallery_image {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  -webkit-filter: grayscale(1);
+  -moz-filter: grayscale(1);
+  -o-filter: grayscale(1);
+  -ms-filter: grayscale(1);
+  filter: grayscale(1);
+  transition: all .3s ease;
+  border-radius: 10px;
+}
+
+#location_maps .sidebar-back .gallery_image:hover {
+  filter: grayscale(0);
+  cursor: pointer;
+}
+
+#location_maps .sidebar-back .wrapper {
+  position: relative;
+  height: 250px;
+  margin-bottom: 15px;
+}
+
+.wrapper {
+  padding: 20px;
+}
+
 #location_maps .advanced-filter {
   display: block;
   border-left: 1px solid #d1d1d1;
@@ -2181,3 +2214,7 @@ section,
 }
 
 .show {display: block;}
+
+.choose_car_container .col-md-6 {
+  margin-bottom: 15px;;
+}

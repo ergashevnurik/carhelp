@@ -176,6 +176,9 @@ function showDetails(shop) {
   document.getElementById("sidebar-back").classList.add("show");
 
   document.getElementById("shop-details").innerHTML = `
+    <div class="wrapper">
+      <div style="background-image: url('https://www.shutterstock.com/image-photo/mechanic-using-wrench-while-working-600nw-2184125681.jpg');" class="gallery_image"></div>
+    </div>
     <h5>${shop.name}</h5>
     <p>${shop.address}</p>
     <p>Rating: ${shop.rating} ⭐</p>

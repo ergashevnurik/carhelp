@@ -20,6 +20,7 @@ async function fetchData() {
             brandImage.src = car.imgSrc;
             brandImage.alt = car.name;
             brandImage.style.width = '20px';
+            brandImage.style.filter = 'grayscale(1)';
             brandImage.style.marginRight = '8px';
             brandItem.appendChild(brandImage);
 
