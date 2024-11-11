@@ -186,6 +186,9 @@ function showDetails(shop) {
     <p>Availability: ${shop.availability}</p>
     <p>Description: ${shop.description || "No additional description available."}</p>
 
+    <h5>Open in waze to navigate</h5>
+    <a href="https://www.waze.com/ul?ll=${shop.location.lat}%2C${shop.location.lng}&navigate=yes&zoom=17" class="mb-3 w-100 btn btn-outline-primary">Open Waze</a>
+
     <h5>Order Call Back</h5>
     <form action="#" class="form-search d-flex align-items-center mb-3">
       <input type="text" class="form-control mr-15" placeholder="Phone number">
