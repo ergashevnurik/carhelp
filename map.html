@@ -45,14 +45,6 @@
 
     <!-- Main CSS File -->
     <link href="assets/css/main.css" rel="stylesheet" />
-
-     <!-- Leaflet CSS -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
-      integrity="sha384-R5H8UFy6y+LMHMPFJ7c+YJ6Nmv+D/SmeK5Vf0JIQ3fqBI/m/CXkJQv7kF2tpGHj4"
-      crossorigin=""
-    />
     
   </head>
   <body class="map_body">
@@ -161,7 +153,7 @@
               <h5>Search by tags</h5>
               <div class="my-3">
                 <div class="form-group">
-                  <input type="text" class="form-control border-primary w-100 tags_input" placeholder="Enter key words to find" />
+                  <input id="tag-search" type="text" class="form-control border-primary w-100 tags_input" placeholder="Enter key words to find" onchange="filterByTags()" />
                 </div>
               </div>
               <h5>Search by radius: <span id="range-value">2 km</span></h5>
@@ -227,12 +219,5 @@
     <script src="assets/js/car_filter.js"></script>
 
     <script src="assets/js/advanced_filter.js"></script>
-
-    <!-- Leaflet JS -->
-    <script
-      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-      integrity="sha384-oKokA3vLP7rR/W7BN8ccIbcR82VCu5CJ3L8N0ngP9DP8e0z13s1oTzUZP1yLVKI1"
-      crossorigin=""
-    ></script>
   </body>
 </html>

@@ -31,6 +31,7 @@ async function loadShopsData() {
     }));
 
     getUserLocation();
+    filterByTags();  // Filter based on tags after loading shops data
   } catch (error) {
     console.error("Failed to load shop data:", error);
   }
@@ -94,6 +95,9 @@ function calculateDistance(loc1, loc2) {
 function findNearestShops(userLocation) {
   const maxDistance = radius; // Use the radius selected by the user
   nearbyShops = shopData.filter(shop => calculateDistance(userLocation, shop.location) <= maxDistance);
+
+  // Apply tag filter if tags are entered
+  filterByTags();
 
   if (nearbyShops.length > 0) {
     map.setCenter(userLocation);
@@ -250,3 +254,31 @@ function clearSidebar() {
   const shopList = document.getElementById("shop-list");
   shopList.innerHTML = ""; // Clear all previous shop cards
 }
+
+function filterByTags() {
+  const input = document.getElementById("tag-search").value;
+  const tags = input.toLowerCase().split(',').map(tag => tag.trim()).filter(tag => tag);
+
+  console.log(tags)
+
+  if (tags.length === 0) {
+    // If no tags are entered, just show all nearby shops based on radius
+    addMarkersAndSidebar(map.getCenter());
+    return;
+  }
+
+  const filteredShops = nearbyShops.filter(shop =>
+    shop.tags.some(tag => tags.includes(tag.toLowerCase()))
+  );
+
+  // Update markers and sidebar with filtered shops
+  if (filteredShops.length > 0) {
+    clearMarkers();
+    clearSidebar();
+    filteredShops.forEach(shop => addMarkersAndSidebar(shop.location));
+  } else {
+    clearSidebar();
+    alert("No shops found with these tags within the specified range.");
+  }
+}
+
