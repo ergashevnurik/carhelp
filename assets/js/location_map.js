@@ -6,15 +6,45 @@ let userMarker, userRadiusCircle;
 let markers = []; // Track markers for later removal
 
 function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: 40.7128, lng: -74.006 },
-    zoom: 11,
-  });
+  // Create the map without setting the initial view yet
+  map = L.map('map');
 
-  loadShopsData();
+  // Add the tile layer (replace with the desired tile layer)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  // Get the user's current location
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const userLocation = [position.coords.latitude, position.coords.longitude];
+
+        // Set the map view to the user's current location
+        map.setView(userLocation, 14); // Set zoom level to 14 (can adjust as needed)
+
+        // Optionally, add a marker for the user's location
+        // L.marker(userLocation).addTo(map)
+        //   .bindPopup("You are here")
+        //   .openPopup();
+
+        // Call loadShopsData after setting the view
+        loadShopsData(userLocation);
+      },
+      () => {
+        alert("Location access denied. Defaulting to New York.");
+        // Fallback if geolocation is not available or denied
+        map.setView([40.7128, -74.0060], 11); // Default to New York
+        loadShopsData([40.7128, -74.0060]);
+      }
+    );
+  } else {
+    alert("Geolocation is not supported by this browser.");
+    // Fallback if geolocation is not supported
+    map.setView([40.7128, -74.0060], 11); // Default to New York
+    loadShopsData([40.7128, -74.0060]);
+  }
 }
 
-async function loadShopsData() {
+async function loadShopsData(userLocation) {
   try {
     const response = await fetch("http://localhost:8083/places/v1/api/loadPlaces");
     if (!response.ok) throw new Error("Network response was not ok " + response.statusText);
@@ -30,78 +60,47 @@ async function loadShopsData() {
       tags: shop.tags || []
     }));
 
-    getUserLocation();
-    filterByTags();  // Filter based on tags after loading shops data
+    getUserLocation(userLocation);  // Pass user's location to getUserLocation
   } catch (error) {
     console.error("Failed to load shop data:", error);
   }
 }
 
-function getUserLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const userLocation = { lat: position.coords.latitude, lng: position.coords.longitude };
+function getUserLocation(userLocation) {
+  // Clear previous user marker and circle if they exist
+  clearPreviousMarkers();
 
-        // Clear the previous user marker and circle if they exist
-        clearPreviousMarkers();
+  // Create a new circle with the updated radius
+  userRadiusCircle = L.circle(userLocation, {
+    color: 'red',
+    fillColor: '#FF0000',
+    fillOpacity: 0.2,
+    radius: radius * 1000, // Convert radius to meters
+  }).addTo(map);
 
-        // Create a new circle with the updated radius
-        userRadiusCircle = new google.maps.Circle({
-          map: map,
-          center: userLocation,
-          radius: radius * 1000, // Convert radius to meters
-          fillColor: "#FF0000",
-          fillOpacity: 0.2,
-          strokeColor: "#FF0000",
-          strokeOpacity: 0.5,
-          strokeWeight: 1,
-        });
+  // Create a new user marker
+  userMarker = L.marker(userLocation, {
+    icon: L.icon({
+      iconUrl: 'assets/img/animated/here.gif',
+      iconSize: [80, 80]
+    })
+  }).addTo(map);
 
-        // Create a new user marker
-        userMarker = new google.maps.Marker({
-          position: userLocation,
-          map: map,
-          title: "Your Location",
-          icon: {
-            url: "assets/img/animated/here.gif",
-            scaledSize: new google.maps.Size(80, 80)
-          }
-        });
-
-        findNearestShops(userLocation);
-      },
-      () => alert("Location access denied.")
-    );
-  } else {
-    alert("Geolocation is not supported by this browser.");
-  }
+  findNearestShops(userLocation);
 }
 
 function calculateDistance(loc1, loc2) {
-  const R = 6371; // Earth's radius in km
-  const dLat = ((loc2.lat - loc1.lat) * Math.PI) / 180;
-  const dLng = ((loc2.lng - loc1.lng) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((loc1.lat * Math.PI) / 180) *
-      Math.cos((loc2.lat * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+  const latLng1 = L.latLng(loc1);
+  const latLng2 = L.latLng(loc2);
+  return latLng1.distanceTo(latLng2) / 1000; // Convert to km
 }
 
 function findNearestShops(userLocation) {
   const maxDistance = radius; // Use the radius selected by the user
   nearbyShops = shopData.filter(shop => calculateDistance(userLocation, shop.location) <= maxDistance);
 
-  // Apply tag filter if tags are entered
-  filterByTags();
-
   if (nearbyShops.length > 0) {
-    map.setCenter(userLocation);
-    map.setZoom(14);
+    map.setView(userLocation, 14);  // Set map center and zoom level
 
     addMarkersAndSidebar(userLocation);
   } else {
@@ -115,43 +114,35 @@ function addMarkersAndSidebar(userLocation) {
   clearSidebar();
 
   nearbyShops.forEach(shop => {
-    const marker = new google.maps.Marker({
-      position: shop.location,
-      map: map,
-      title: shop.name,
-    });
-    
+    // const icon = new L.DivIcon({
+    //   className: 'icon-div',
+    //   html: `<div class="rating-marker">${shop.rating} ⭐</div>`,
+    // }); 
+
+    // const marker = L.marker(shop.location).setIcon(icon).addTo(map);
+    const marker = L.marker(shop.location).addTo(map);
     markers.push(marker); // Keep track of markers
 
-    const infoWindow = new google.maps.InfoWindow({
-      content: `
-        <div>
-          <h5>${shop.name}</h5>
-          <p>Rating: ${shop.rating} ⭐</p>
-          <p>${shop.address}</p>
-          <p>Phone: ${shop.phone}</p>
-          <p>Availability: ${shop.availability}</p>
-        </div>
-      `,
-    });
+    const popupContent = `
+      <div>
+        <h5>${shop.name}</h5>
+        <p>Rating: ${shop.rating} ⭐</p>
+        <p>${shop.address}</p>
+        <p>Phone: ${shop.phone}</p>
+        <p>Availability: ${shop.availability}</p>
+      </div>
+    `;
+    marker.bindPopup(popupContent);
 
-    marker.addListener("click", () => {
-      infoWindow.open(map, marker);
-    });
+    // Handle mouse events
+    marker.on('mouseover', () => marker.openPopup());
+    marker.on('mouseout', () => marker.closePopup());
 
-    marker.addListener("mouseover", () => {
-      infoWindow.open(map, marker);
-    });
-
-    marker.addListener("mouseout", () => {
-      infoWindow.close();
-    });
-
-    addShopToSidebar(shop, infoWindow, marker);
+    addShopToSidebar(shop, marker);
   });
 }
 
-function addShopToSidebar(shop, infoWindow, marker) {
+function addShopToSidebar(shop, marker) {
   const shopList = document.getElementById("shop-list");
   const shopCard = document.createElement("div");
   shopCard.classList.add("card", "mb-3", "p-3", "shadow-sm", "shop-card");
@@ -165,13 +156,8 @@ function addShopToSidebar(shop, infoWindow, marker) {
   `;
   shopList.appendChild(shopCard);
 
-  shopCard.addEventListener("mouseenter", () => {
-    infoWindow.open(map, marker);
-  });
-
-  shopCard.addEventListener("mouseleave", () => {
-    infoWindow.close();
-  });
+  shopCard.addEventListener("mouseenter", () => marker.openPopup());
+  shopCard.addEventListener("mouseleave", () => marker.closePopup());
 
   shopCard.addEventListener("click", () => showDetails(shop));
 }
@@ -190,7 +176,7 @@ function showDetails(shop) {
     <p>Availability: ${shop.availability}</p>
     <p>Description: ${shop.description || "No additional description available."}</p>
 
-    <h5>Open in waze to navigate</h5>
+    <h5>Open in Waze to navigate</h5>
     <a href="https://www.waze.com/ul?ll=${shop.location.lat}%2C${shop.location.lng}&navigate=yes&zoom=17" class="mb-3 w-100 btn btn-outline-primary">Open Waze</a>
 
     <h5>Order Call Back</h5>
@@ -227,58 +213,33 @@ function closeDetails() {
 }
 
 function updateRadius(value) {
-  // Update the radius value display
   const rangeValueElement = document.getElementById("range-value");
-  rangeValueElement.textContent = `${value} km`;
-
-  // You can call your function to update the map with the new radius here
+  rangeValueElement.textContent = value + " km";
   radius = value;
-  getUserLocation();  // Re-fetch the user's location and apply filters again
+  if (userMarker && userRadiusCircle) {
+    getUserLocation(userMarker.getLatLng()); // Update user location and refresh nearby shops
+  }
 }
 
-// Clear all markers on the map
-function clearMarkers() {
-  markers.forEach(marker => marker.setMap(null)); // Remove each marker
-  markers = []; // Clear the markers array
-}
-
-// Clear previous user marker and radius circle
 function clearPreviousMarkers() {
-  if (userMarker) userMarker.setMap(null);
-  if (userRadiusCircle) userRadiusCircle.setMap(null);
-  nearbyShops = []; // Clear the previously found shops
+  if (userMarker) {
+    map.removeLayer(userMarker);
+  }
+  if (userRadiusCircle) {
+    map.removeLayer(userRadiusCircle);
+  }
+  clearMarkers(); // Clear other markers as well
 }
 
-// Clear Sidebar Data
+function clearMarkers() {
+  markers.forEach(marker => map.removeLayer(marker));
+  markers = [];
+}
+
 function clearSidebar() {
-  const shopList = document.getElementById("shop-list");
-  shopList.innerHTML = ""; // Clear all previous shop cards
+  document.getElementById("shop-list").innerHTML = "";
 }
 
-function filterByTags() {
-  const input = document.getElementById("tag-search").value;
-  const tags = input.toLowerCase().split(',').map(tag => tag.trim()).filter(tag => tag);
-
-  console.log(tags)
-
-  if (tags.length === 0) {
-    // If no tags are entered, just show all nearby shops based on radius
-    addMarkersAndSidebar(map.getCenter());
-    return;
-  }
-
-  const filteredShops = nearbyShops.filter(shop =>
-    shop.tags.some(tag => tags.includes(tag.toLowerCase()))
-  );
-
-  // Update markers and sidebar with filtered shops
-  if (filteredShops.length > 0) {
-    clearMarkers();
-    clearSidebar();
-    filteredShops.forEach(shop => addMarkersAndSidebar(shop.location));
-  } else {
-    clearSidebar();
-    alert("No shops found with these tags within the specified range.");
-  }
-}
-
+document.getElementById("range-slider").addEventListener("input", function (e) {
+  updateRadius(e.target.value);
+});

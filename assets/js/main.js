@@ -9,6 +9,40 @@
 (function () {
   "use strict";
 
+  /* Toggle to open mobile header */
+  $(".mobile-header").click(function () {
+    $(".sidebar").toggleClass("active-from-bottom");
+  });
+
+  // var isResizing = false,
+  //   lastDownX = 0;
+
+  // var container = $("#location_maps_container"),
+  //   left = $("#sidebar"),
+  //   right = $("#map"),
+  //   handle = $("#drag");
+
+  // handle.on("mousedown", function (e) {
+  //   isResizing = true;
+  //   lastDownX = e.clientX;
+  // });
+
+  // $(document)
+  //   .on("mousemove", function (e) {
+  //     // we don't want to do anything if we aren't resizing.
+  //     if (!isResizing) return;
+
+  //     var offsetRight =
+  //       container.height() - (e.clientX - container.offset().left);
+
+  //     left.css("top", offsetRight);
+  //     right.css("height", offsetRight);
+  //   })
+  //   .on("mouseup", function (e) {
+  //     // stop resizing
+  //     isResizing = false;
+  //   });
+
   /**
    * Apply .scrolled class to the body as the page is scrolled down
    */
@@ -152,3 +186,7 @@
       });
     });
 })();
+
+function changeIcon(x) {
+  x.classList.toggle("bx-menu-alt-left");
+}

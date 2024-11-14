@@ -7,6 +7,8 @@
     <meta name="description" content="" />
     <meta name="keywords" content="" />
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <!-- Favicons -->
     <link href="assets/img/favicon.png" rel="icon" />
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
@@ -49,18 +51,12 @@
   </head>
   <body class="map_body">
 
-    <header id="header" class="header d-flex align-items-center fixed-top">
+    <!-- <header id="header" class="header d-flex align-items-center fixed-top">
       <div class="container-fluid container-xl position-relative d-flex align-items-center">
-  
         <a href="index.html" class="logo d-flex align-items-center me-auto">
-          <!-- Uncomment the line below if you also wish to use an image logo -->
-          <!-- <img src="assets/img/logo.png" alt=""> -->
           <h1 class="sitename">Carhelp.lv</h1>
-        </a>
-
-        <p class="m-0 text-danger"><b>WEBSITE UNDER CONSTRUCTION</b></p>
-  
-        <!-- <nav id="navmenu" class="navmenu">
+        </a>  
+        <nav id="navmenu" class="navmenu">
           <ul>
             <li><a href="map.html" class="active">Find Repair Location<br></a></li>
             <li><a href="about.html">Get an Estimate</a></li>
@@ -118,22 +114,24 @@
             </li>
           </ul>
           <i class="mobile-nav-toggle d-xl-none bi bi-list" style="color: #000;"></i>
-        </nav> -->
-  
-        <!-- <a class="btn-getstarted" href="get-a-quote.html">
+        </nav>
+        <a class="btn-getstarted" href="get-a-quote.html">
           <i class='bx bx-search-alt-2'></i>
-        </a> -->
-  
+        </a>
         <a href="" class="btn-getstarted">
           <i class='bx bx-user-circle'></i>
         </a>
-  
       </div>
-    </header>
+    </header> -->
+
+    <div class="mobile-header">
+      <i onclick="changeIcon(this)" class='bx bx-menu'></i>
+    </div>
 
     <section id="location_maps">
-      <div class="container-fluid">
-        <div class="sidebar">
+      <div class="container-fluid" id="location_maps_container">
+        <div id="sidebar" class="sidebar">
+          <!-- <div id="drag"></div> -->
           <h2>Shops Near Me</h2>
           <div class="btn-group mb-3" role="group" aria-label="Filter options">
             <button type="button" class="advanced_button btn btn-primary d-flex align-items-center">Advanced filter <i style="margin-left: 5px;" class='bx bx-slider-alt'></i></button>
@@ -202,6 +200,7 @@
       defer
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCzEnQvUpToxhmom2APiBLEJ6fdZYRyJr8&callback=initMap"
     ></script>
+    
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -218,6 +217,6 @@
 
     <script src="assets/js/car_filter.js"></script>
 
-    <script src="assets/js/advanced_filter.js"></script>
+    <script src="assets/js/advanced_filter.js"></script>    
   </body>
 </html>
